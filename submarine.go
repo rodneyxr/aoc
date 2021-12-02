@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 )
 
 // Submarine
@@ -9,13 +10,16 @@ type Submarine struct {
 	// pos is the position of the submarine
 	pos Vector2
 
+	// aim is the face of the submarine
+	aim float64
+
 	// oceanMap is a map of the ocean floor relative to the submarine
 	oceanMap OceanMap
 }
 
 // NewSubmarine
 func NewSubmarine() Submarine {
-	return Submarine{pos: Vector2{0, 0}}
+	return Submarine{pos: Vector2{0, 0}, aim: 0}
 }
 
 func (sub *Submarine) MoveUp(distance float64) {
@@ -26,12 +30,21 @@ func (sub *Submarine) MoveDown(distance float64) {
 	sub.pos = sub.pos.Add(VECTOR2_DOWN.Scale(distance))
 }
 
-func (sub *Submarine) MoveForward(distance float64) {
-	sub.pos = sub.pos.Add(VECTOR2_RIGHT.Scale(distance))
-}
-
 func (sub *Submarine) MoveBack(distance float64) {
 	sub.pos = sub.pos.Add(VECTOR2_LEFT.Scale(distance))
+}
+
+func (sub *Submarine) MoveForward(distance float64) {
+	move := Vector2{distance, distance * sub.aim}
+	sub.pos = sub.pos.Add(move)
+}
+
+func (sub *Submarine) AimUp(amount float64) {
+	sub.aim += amount
+}
+
+func (sub *Submarine) AimDown(amount float64) {
+	sub.aim -= amount
 }
 
 func (sub *Submarine) Move(direction Vector2) {
@@ -54,8 +67,14 @@ func (sub *Submarine) ScanOceanFloor(ocean OceanMap, scanSize int) {
 }
 
 func (sub *Submarine) Pilot(instructions []Vector2) {
-	for _, x := range instructions {
-		sub.Move(x)
+	for _, move := range instructions {
+		if move.Y < 0 { // Down
+			sub.AimDown(math.Abs(move.Y))
+		} else if move.Y > 0 { // Up
+			sub.AimUp(math.Abs(move.Y))
+		} else if move.X > 0 { // Forward
+			sub.MoveForward(move.X)
+		}
 	}
 }
 

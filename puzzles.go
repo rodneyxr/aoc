@@ -41,7 +41,8 @@ func day1Part2() {
 	fmt.Println(depthDropCounter)
 }
 
-func day2Part1() {
+// breaks day2Part1
+func day2Part2() {
 	sub := NewSubmarine()
 	instructions, err := LoadPilotInstructionsFromFile("input/2.txt")
 	if err != nil {

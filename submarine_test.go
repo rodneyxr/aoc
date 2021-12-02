@@ -51,3 +51,18 @@ func TestSubmarineScanWindowSize3(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSubmarineMove(t *testing.T) {
+	sub := NewSubmarine()
+	sub.MoveForward(5)
+	sub.MoveDown(5)
+	sub.MoveForward(8)
+	sub.MoveUp(3)
+	sub.MoveDown(8)
+	sub.MoveForward(2)
+
+	// Answer: (15, -10)
+	if !sub.pos.Equal(Vector2{15, -10}) {
+		t.Fail()
+	}
+}

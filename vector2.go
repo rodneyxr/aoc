@@ -5,9 +5,20 @@ import (
 	"math"
 )
 
+var (
+	VECTOR2_UP    = Vector2{0, 1}
+	VECTOR2_DOWN  = Vector2{0, -1}
+	VECTOR2_LEFT  = Vector2{-1, 0}
+	VECTOR2_RIGHT = Vector2{1, 0}
+)
+
 // Vector2 is the representation of 2D vectors and points
 type Vector2 struct {
 	X, Y float64
+}
+
+func (v Vector2) Scale(factor float64) Vector2 {
+	return Vector2{v.X * factor, v.Y * factor}
 }
 
 func (v Vector2) Add(other Vector2) Vector2 {

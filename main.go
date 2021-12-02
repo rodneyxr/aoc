@@ -21,11 +21,19 @@ func NewSubmarine() Submarine {
 	return Submarine{pos: Vector2{0, 0}}
 }
 
-func (sub *Submarine) ScanOceanFloor(ocean OceanMap) {
-	for _, v := range ocean.data {
-		relativePos := v.Subtract(sub.pos)
-		sub.oceanMap.addData(relativePos.X, relativePos.Y)
+func (sub *Submarine) ScanOceanFloor(ocean OceanMap, scanSize int) {
+	sub.oceanMap = OceanMap{}
+	for i := 0; i <= len(ocean.data) - scanSize; i++ {
+		depthSum := 0.0
+		for j := i; j < i + scanSize; j++ {
+			depthSum += ocean.data[j].Y
+		}
+		sub.oceanMap.addData(float64(i), depthSum)
 	}
+	//for _, v := range ocean.data {
+	//	relativePos := v.Subtract(sub.pos)
+	//	sub.oceanMap.addData(relativePos.X, relativePos.Y)
+	//}
 }
 
 // String returns a nicely formatted string for this object.
@@ -93,7 +101,7 @@ func main() {
 		log.Fatal(err)
 	}
 	sub := NewSubmarine()
-	sub.ScanOceanFloor(ocean)
+	sub.ScanOceanFloor(ocean, 3)
 	//sub.oceanMap.Print()
 	depthDropCounter := 0
 	for i, v := range sub.oceanMap.data {

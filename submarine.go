@@ -15,6 +15,9 @@ type Submarine struct {
 
 	// oceanMap is a map of the ocean floor relative to the submarine
 	oceanMap OceanMap
+
+	// diagnostics is a list of binary numbers representing diagnostic readings
+	diagnostics []uint
 }
 
 // NewSubmarine
@@ -76,6 +79,41 @@ func (sub *Submarine) Pilot(instructions []Vector2) {
 			sub.MoveForward(move.X)
 		}
 	}
+}
+
+func (sub *Submarine) LoadDiagnostics(diagnostics []uint) {
+	sub.diagnostics = diagnostics
+}
+
+func (sub *Submarine) CalculatePowerConsumption(bits int) uint {
+	return sub.CalculateGammaRate(bits) * sub.CalculateEpsilonRate(bits)
+}
+
+// CalculateGammaRate reads diagnostics to find the MOST common bit for each position in the bitstring
+func (sub *Submarine) CalculateGammaRate(bits int) uint {
+	gamma := uint(0b0)
+	for i := bits - 1; i >= 0; i-- {
+		count := uint(0)
+		for _, diag := range sub.diagnostics {
+			// Get the bit
+			bit := (diag >> i) & 0b1
+
+			// Add the bit to the counts
+			count += bit
+		}
+		// If double the count is bigger than the total, that means 1 is
+		// the most common
+		if count*2 >= uint(len(sub.diagnostics)) {
+			gamma += uint(1) << uint(i)
+		}
+	}
+	return gamma
+}
+
+// CalculateEpsilonRate reads diagnostics to find the LEAST common bit for each position in the bitstring
+func (sub *Submarine) CalculateEpsilonRate(bits int) uint {
+	mask := uint((math.Pow(2, float64(bits))) - 1)
+	return ^sub.CalculateGammaRate(bits) & mask
 }
 
 // String returns a nicely formatted string for this object.

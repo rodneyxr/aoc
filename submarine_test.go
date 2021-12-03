@@ -65,3 +65,29 @@ func TestSubmarineMove(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSubmarineDiagnostics(t *testing.T) {
+	diagnostics, err := LoadDiagnosticReportFromFile("input/test/3.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sub := NewSubmarine()
+	sub.LoadDiagnostics(diagnostics)
+	bits := 5
+	gammaRate := sub.CalculateGammaRate(bits)
+	//fmt.Printf("%05b\n", gammaRate)
+	if gammaRate != 0b10110 {
+		t.Fail()
+	}
+
+	epsilonRate := sub.CalculateEpsilonRate(bits)
+	//fmt.Printf("%05b\n", epsilonRate)
+	if epsilonRate != 0b01001 {
+		t.Fail()
+	}
+
+	powerConsumption := sub.CalculatePowerConsumption(bits)
+	if powerConsumption != 198 {
+		t.Fail()
+	}
+}

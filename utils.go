@@ -51,3 +51,21 @@ func LoadPilotInstructionsFromFile(path string) ([]Vector2, error) {
 	}
 	return instructions, nil
 }
+
+func LoadDiagnosticReportFromFile(path string) ([]uint, error) {
+	lines, err := readLines(path)
+	if err != nil {
+		return nil, err
+	}
+	var diagnostics []uint
+	for _, line := range lines {
+		x, err := strconv.ParseUint(line, 2, len(line))
+		if err != nil {
+			return nil, err
+
+		}
+		diagnostics = append(diagnostics, uint(x))
+	}
+
+	return diagnostics, nil
+}

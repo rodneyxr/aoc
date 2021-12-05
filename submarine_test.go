@@ -91,3 +91,32 @@ func TestSubmarineDiagnostics(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSubmarineLifeSupport(t *testing.T) {
+	diagnostics, err := LoadDiagnosticReportFromFile("input/test/3.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sub := NewSubmarine()
+	sub.LoadDiagnostics(diagnostics)
+	bits := 5
+
+	oxygenGeneratorRating := sub.CalculateOxygenGeneratorRating(bits)
+	//fmt.Printf("%05b\n", oxygenGeneratorRating)
+	if oxygenGeneratorRating != 0b10111 {
+		t.Fail()
+	}
+
+	c02ScrubberRating := sub.CalculateC02ScrubberRating(bits)
+	//fmt.Printf("%05b\n", c02ScrubberRating)
+	if c02ScrubberRating != 0b01010 {
+		t.Fail()
+	}
+
+	lifeSupportRating := sub.CalculateLifeSupportRating(bits)
+	//fmt.Printf("%05b: ", lifeSupportRating)
+	//fmt.Println(lifeSupportRating)
+	if lifeSupportRating != 230 {
+		t.Fail()
+	}
+}

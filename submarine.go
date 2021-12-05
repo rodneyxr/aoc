@@ -91,10 +91,14 @@ func (sub *Submarine) CalculatePowerConsumption(bits int) uint {
 
 // CalculateGammaRate reads diagnostics to find the MOST common bit for each position in the bitstring
 func (sub *Submarine) CalculateGammaRate(bits int) uint {
+	return CalculateGammaRateAbstract(sub.diagnostics, bits)
+}
+
+func CalculateGammaRateAbstract(data []uint, bits int) uint {
 	gamma := uint(0b0)
 	for i := bits - 1; i >= 0; i-- {
 		count := uint(0)
-		for _, diag := range sub.diagnostics {
+		for _, diag := range data {
 			// Get the bit
 			bit := (diag >> i) & 0b1
 
@@ -103,7 +107,7 @@ func (sub *Submarine) CalculateGammaRate(bits int) uint {
 		}
 		// If double the count is bigger than the total, that means 1 is
 		// the most common
-		if count*2 >= uint(len(sub.diagnostics)) {
+		if count*2 >= uint(len(data)) {
 			gamma += uint(1) << uint(i)
 		}
 	}
@@ -112,8 +116,73 @@ func (sub *Submarine) CalculateGammaRate(bits int) uint {
 
 // CalculateEpsilonRate reads diagnostics to find the LEAST common bit for each position in the bitstring
 func (sub *Submarine) CalculateEpsilonRate(bits int) uint {
+	return CalculateEpsilonRateAbstract(sub.diagnostics, bits)
+}
+
+func CalculateEpsilonRateAbstract(data []uint, bits int) uint {
 	mask := uint((math.Pow(2, float64(bits))) - 1)
-	return ^sub.CalculateGammaRate(bits) & mask
+	return ^CalculateGammaRateAbstract(data, bits) & mask
+}
+
+// CalculateOxygenGeneratorRating
+func (sub Submarine) CalculateOxygenGeneratorRating(bits int) uint {
+	// Copy the diagnostics
+	diagCopy := make([]uint, len(sub.diagnostics))
+	copy(diagCopy, sub.diagnostics)
+
+	// Calculate the initial oxygen rate
+	oxy := sub.CalculateGammaRate(bits)
+
+	// lambda
+	nbit := func(x uint, n int) uint { return (x >> (n)) & 0b1}
+
+	// Filter by each bit
+	for i := bits; i >= 0; i-- {
+		var filter []uint
+		for _, diag := range diagCopy {
+			if nbit(diag, i) == nbit(oxy, i) {
+				filter = append(filter, diag)
+			}
+		}
+		if len(filter) == 0 {
+			return diagCopy[0]
+		}
+		diagCopy = filter
+		oxy = CalculateGammaRateAbstract(diagCopy, bits)
+	}
+	return oxy
+}
+
+func (sub Submarine) CalculateC02ScrubberRating(bits int) uint {
+	// Copy the diagnostics
+	diagCopy := make([]uint, len(sub.diagnostics))
+	copy(diagCopy, sub.diagnostics)
+
+	// Calculate the initial oxygen rate
+	c02 := sub.CalculateEpsilonRate(bits)
+
+	// lambda
+	nbit := func(x uint, n int) uint { return (x >> (n)) & 0b1}
+
+	// Filter by each bit
+	for i := bits; i >= 0; i-- {
+		var filter []uint
+		for _, diag := range diagCopy {
+			if nbit(diag, i) == nbit(c02, i) {
+				filter = append(filter, diag)
+			}
+		}
+		if len(filter) == 0 {
+			return diagCopy[0]
+		}
+		diagCopy = filter
+		c02 = CalculateEpsilonRateAbstract(diagCopy, bits)
+	}
+	return c02
+}
+
+func (sub Submarine) CalculateLifeSupportRating(bits int) uint {
+	return sub.CalculateOxygenGeneratorRating(bits) * sub.CalculateC02ScrubberRating(bits)
 }
 
 // String returns a nicely formatted string for this object.
